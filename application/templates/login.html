@@ -1,0 +1,140 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>うみねこファンド - Login</title>
+    <style>
+        body {
+            background-image: url("/static/images/DSC00188.JPG");
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+        h1, h2, p {
+            margin: 0;
+            padding: 10px 20px;
+        }
+        h1 {
+            font-size: 2.5em;
+            color: #00f;
+            text-align: left; /* Left-align */
+        }
+        h2 {
+            font-size: 1.8em;
+            text-align: left; /* Left-align */
+        }
+        .large-text {
+            font-size: 1.2em;
+        }
+        .extra-large-text {
+            font-size: 2.5em;
+        }
+        .color-blue {
+            color: #00f;
+        }
+        .color-purple {
+            color: #800080;
+        }
+        .color-yellow {
+            color: #ffff00;
+        }
+        .color-white {
+            color: #fff;
+        }
+        /* Adjusted the login container to align to the left */
+        .login-container {
+            background-color: rgba(255, 255, 255, 0.95); /* Slightly more opaque background */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 300px;
+            margin: 20px 20px;
+            text-align: center;
+        }
+        .login-container h2 {
+            color: black; /* Ensure the "Login" text is visible */
+            margin-bottom: 20px; /* Add space below the "Login" heading */
+        }
+        input[type="email"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .margin-top {
+            margin-top: 20px;
+        }
+        .text-left {
+            text-align: left; /* Class for left alignment */
+        }
+        .small-large-text {
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Welcome Section -->
+    <header>
+        <h1 class="text-left extra-large-text color-blue">うみねこファンド</h1>
+        <h2 class="text-left large-text">うみねこファンドへようこそ～</h2>
+        <p class="text-left large-text color-purple">
+            このページでは東京証券取引所に上場している企業の1株あたりの
+            理論上の価値を実際の株価と比較することが出来ます。
+        </p>
+    </header>
+
+    <!-- Login Form Section -->
+    <div class="login-container">
+        <h2>Login</h2>
+        <form method="POST" action="/login">
+            <input type="email" id="email" name="email" placeholder="Email" required>
+            <br>
+            <input type="password" id="password" name="password" placeholder="Password" required>
+            <br>
+            <button type="submit">Login</button>
+
+            <!-- Display any flashed messages -->
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+            {% endwith %}
+        </form>
+    </div>
+
+    <!-- Footer Section -->
+    <footer>
+        <p class="margin-top text-right small-large-text color-white">
+            うみねこファンドへのご意見・ご質問は<a href="mailto:o.fukushi@gmail.com" class="color-yellow">こちら</a>まで<br>
+        </p>
+        <p class="text-right small-large-text color-white">
+            運営組織：うみねこファンド<br>
+            所在地：青森県八戸市南類家2丁目
+        </p>
+    </footer>
+
+</body>
+</html>

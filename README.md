@@ -1,0 +1,179 @@
+
+修正点その1
+can you add the followings?
+それぞれのタイトルの右側に
+watchlist.htmlに"Go to Index" button
+portfolio.htmlに"Do to Index" button
+record_w52_high.htmlに"Go to Index button"
+
+修正点その2
+by the way can you add a button that can work 4 different way as below?
+Plot.htmlに追加するボタン
+index.htmlからPlotへいった場合にshows"Go to Index" button
+watchlist.html からplotへ行った場合にshows"Go to Watchlist" button
+portfolio.htmlからplotへいった場合にshows"Go to Portfolio" button
+record_w52_high.htmlからいった場合にshows"Go to Record W53 High" button
+
+t1はここまで出来た
+
+ｔ2では
+filtered_reslults テーブルを作成してデータを入力する仕組みは出来た
+さらにはfiltered_result.htmlを作成して今までインデックスで表示したいた部分を移した
+表示はカラムをフリーズさせてその他をスクロール出来るようにした
+
+それから不思議なんだがこの部分をコメントアウトしているんだが依然として Back to Filtered Results の表示が出てる　普通の Go Back にしたいのだが
+        <!-- {% elif source == 'filtered_results' %}
+            <a href="{{ url_for('filtered_results') }}" class="button">Back to Filtered Results</a> -->
+コメントの形式: Jinja2のテンプレートエンジン（Flaskで使用）の標準的なコメントアウト方法は {# ... #} です
+ {# <a href="{{ url_for('filtered_results') }}" class="button">Back to Filtered Results</a> #}
+
+t3では下記が実行できた
+
+Index.htmlのfiltered_resultsからplotへいったときにその時点のテーブルを読み込んで"Previous""Next"ボタンで順次表示させる
+watchlist.htmlからplotへいったときにその時点のテーブルを読み込んで"Previous""Next"ボタンで順次表示させる
+portfolio.htmからplotへいったときにその時点のテーブルを読み込んで"Previous""Next"ボタンで順次表示させる
+record_w52_high.htmからplotへいったときにその時点のテーブルを読み込んで"Previous""Next"ボタンで順次表示させる
+
+watchlist と portfolio を新たに追加する際に seccode 順に並べ替えて保存させるようにした
+filterd results と recordW52 は常にコード順で保存されているのでそのまま使える
+
+t3-1では
+全てのページをスクロールできるようにした
+filtered results テーブルがないときは作るというロジックが正しく実行されるようにした
+"Or Enter Sec Code Directly" で index.html から plotへいったときも"Go to Filtered Results" が表示されていたが修正してindexからいったときには
+Privious/Nextボタンが表示されず "Go to Index" でindexへ戻れるようにしたつもり
+w52 テーブルでデータがないときにはエラーになってしまってNextボタンを使うことが出来ないので読み込むテーブルにデータがなくてもPrivious と Nextボタンが使えるようにした
+Or Enter Sec Code Directlyでインデックスから行ったときも企業名が表示されようにした
+
+t3-2では
+watchlist.htmlからplotへいったときに表示されている　Add to Watchlist　を　Remove　ボタンに変えた
+portfolio.htmからplotへいったときに表示されている　Add to Portfolio　を　Remove　ボタンに変えた
+record_w52_high.html から plot へ行ったときに Remove from 52W High を追加した
+
+
+t3-3では
+is_heroku = True として常にHerokuのテーブルを参照するようにしてある
+record W52 High Tableのtimestampが2024-12-16 04:01:16.444810+00:00と表示されるので秒単位までにする時間までにするように修正した
+
+ｔ4-2では
+フォルダーの構成を変更してapp.pyからwatchlist, portfolio, record_high ルートを外してroutesフォルダーへ移した
+project/
+├── app.py
+├── .env
+└── application/
+       ├── backend/
+       |      ├── __init__.py
+       |      ├── auth.py
+       |      ├── db_connect.py
+       |      ├── engine.py
+       |      ├── fetch_company_data.py
+       |      ├── filtered_table.py
+       |      └── .py
+       ├── fonts/
+       ├── routes/
+       |      ├── __init__.py
+       |      ├── portfolio_route.py
+       |      ├── record_w52_high_route.py
+       |      └── watchlist_route.py
+       ├── static/
+       |      ├── css/
+       |      ├── js/
+       |      └── images/
+       ├── templates/
+       |       ├── filtered_results.html
+       |       ├── index.html
+       |       ├── login.html
+       |       ├── plot.html
+       |       ├── portfolio.html
+       |       ├── record_w52_high.html
+       |       └── watchlist.html
+       ├── __init__.py
+       ├── plot_fins_all_bps_opvalues.py
+       ├── plot_fins_all_netsales.py
+       └── stok_price.py
+
+filtered_results テーブルの['earn_flag', 'div_flag']カラムが空になっていたのは、fins_all_netsales テーブルのカラムが'Earn_flag', 'Div_flag'と大文字で始まっていたからだった
+カラム名を全て小文字で保存するように修正した
+backend フォルダを作って：
+       db_connect を de_connect, engineに分割した　そしてengineだけをインポートするように修正した
+       auth.py, fetch_company_data.py, filtered_table.py を移動させて参照するようにした
+       
+       plot_fins_all_bps_opvalues.pyとplot_fins_all_netsales.pyも移動させて参照させたがなぜかプロットページでグラフを表示できなくなったので参照先は今まで通りapplication内のスクリプトにしてある
+t4-3 では
+Value routeを追加してplotページの調整をした
+indexページも修正したがボタンの色をplotページと後で合わせる予定
+project/
+├── app.py
+├── .env
+└── application/
+       ├── backend/
+       |      ├── __init__.py
+       |      ├── auth.py
+       |      ├── db_connect.py
+       |      ├── engine.py
+       |      ├── fetch_company_data.py
+       |      ├── filtered_table.py
+       |      ├── #plot_fins_all_bps_opvalues.py
+       |      ├── #plot_fins_all_netsales.py       
+       |      └── stock_price.py  #fetch_company_data.pyで呼ばれている
+       ├── fonts/
+       ├── routes/
+       |      ├── __init__.py
+       |      ├── portfolio_route.py
+       |      ├── record_w52_high_route.py
+       |      ├── Value_route.py
+       |      └── watchlist_route.py
+       ├── static/
+       |      ├── css/
+       |      ├── js/
+       |      └── images/
+       ├── templates/
+       |       ├── filtered_results.html
+       |       ├── index.html
+       |       ├── login.html
+       |       ├── plot.html
+       |       ├── portfolio.html
+       |       ├── record_w52_high.html
+       |       ├── Value.html
+       |       └── watchlist.html
+       ├── __init__.py
+       ├── plot_fins_all_bps_opvalues.py
+       ├── plot_fins_all_netsales.py
+       └── .py
+
+plotでw52 highを表示させた際にremoveボタンを追加した
+seccode directでplotへ行った場合にcompanyname が 会社名がありませんとなってしまうのを修正した
+plotでfiltered_resultsページを表示させたときにearn と div flag を追加した
+
+t4-4 ではテーブルの名前を変更した
+portfolio-->recordhigh, watchlist-->growth
+
+t5-1での修正点
+ここでは、はっしゃんの基準 bps_eval ではない通常のBPSのライン bps を追加する
+
+       bps_clipped = np.clip(df['bps'], 0, None)  # Clip the BPS values at 0
+
+# New: Add bps_clipped line (highlight with distinct color and style)
+       ax1.step(df['quarterenddate'], bps_clipped, label='BPS Clipped Line', color='cyan', linestyle='-.', where='mid', zorder=4)
+
+# 🔥 New: Add Scatter plot for key `bps_clipped` points
+       ax1.scatter(df['quarterenddate'], bps_clipped, label='BPS Clipped (Points)', color='cyan', marker='*', s=40, zorder=5)
+Applied zorder=5 to ensure the points appear on top for visibility. これは見た目で後で変更できる
+
+# Fill area between bps_eval_clipped and bps_clipped
+       ax1.fill_between(df['quarterenddate'], bps_eval_clipped, bps_clipped, color='lightcyan', alpha=0.5, step='mid', label='BPS Fill Area')
+If needed, adjust alpha (e.g., alpha=0.1 or alpha=0.2) for the desired transparency effect.
+
+t5-2 ではフィルタリングロジックの強化を目的とする
+
+app_t.py ではアップデートしたスクリプトを記載したが実施何がどのようにアップデートされたのかはよくわかラナイ
+t5-1 との使い勝手の違いを見定めてから次へ進む
+
+
+
+Heroku へアップロードする前に db_connect.py の is_heroku = "DYNO" in os.environ を選択する
+
+
+
+
+

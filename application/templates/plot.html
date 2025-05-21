@@ -1,0 +1,279 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Graph for {{ companyname }}</title>
+    <style>
+        .title-container {
+            display: flex; /* Arranges the items in a row */
+            justify-content: center; /* Centers the items horizontally */
+            align-items: center; /* Aligns items vertically */
+            gap: 20px; /* Adds spacing between the items */
+            margin-top: 20px; /* Optional: Adds space from the top */
+        }
+    
+        .title-container h1 {
+            margin: 0; /* Removes default margin */
+            font-size: 2em; /* Adjust font size as needed */
+        }
+    
+        .title-container h2 {
+            margin: 0; /* Removes default margin */
+            font-size: 1.5em; /* Adjust font size as needed */
+            color: #555; /* Optional: Change color for distinction */
+        }
+    </style>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .graph-container {
+            margin: 20px auto;
+            padding: 10px;
+            background-color: white;
+            border: 1px solid #ccc;
+            width: 80%;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+            position: relative;
+            text-align: center;
+        }
+        #graph-img {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            height: auto;
+        }
+        .return-button {
+            margin-top: 20px;
+        }
+        .return-button a {
+            text-decoration: none;
+            color: white;
+            background-color: #4CAF50;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        .return-button a:hover {
+            background-color: #45a049;
+        }
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.2em;
+            color: #555;
+        }
+        /* General button styles */
+        .growth-button,
+        .recordhigh-button,
+        .value-button,
+        .record-w52-button {
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 1em;
+            border: none;
+            cursor: pointer;
+            color: white;
+            margin: 5px; /* Add spacing between buttons */
+        }
+
+        /* Growth button styles */
+        .growth-button {
+            background-color: #007bff;
+        }
+        .growth-button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Portfolio button styles */
+        .recordhigh-button {
+            background-color: #ff4c4c;
+        }
+        .recordhigh-button:hover {
+            background-color: #cc0000;
+        }
+
+        /* Value button styles */
+        .value-button {
+            background-color: #6a1b9a;
+        }
+        .value-button:hover {
+            background-color: #4a148c;
+        }
+
+        /* Record W52 High button styles */
+        .record-w52-button {
+            background-color: #28a745;
+        }
+        .record-w52-button:hover {
+            background-color: #218838;
+        }
+    </style>
+    <style>
+        .additional-info {
+            margin: 20px auto;
+            text-align: center;
+        }
+        .additional-info table {
+            margin: 0 auto;
+            border-collapse: collapse;
+        }
+        .additional-info th, .additional-info td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        .additional-info th {
+            background-color: #f4f4f4;
+        }
+    </style>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="title-container">
+        <h1>Graph for {{ companyname }}</h1>
+        <h2>Sec Code: {{ seccode }}</h2>
+    </div>
+    
+    <div class="navigation-buttons">
+        {% if source == 'index' %}
+            <a href="{{ url_for('index') }}" class="button">Go to Index</a>
+        {% elif source == 'growth' %}
+            <a href="{{ url_for('growth.view_growth') }}" class="button">Go to Growth</a>
+        {% elif source == 'value' %}
+            <a href="{{ url_for('value.view_value') }}" class="button">Go to Value</a>
+        {% elif source == 'recordhigh' %}
+            <a href="{{ url_for('recordhigh.view_recordhigh') }}" class="button">Go to Record High</a>
+        {% elif source == 'record_w52_high' %}
+            <a href="{{ url_for('record_w52_high.record_w52_high') }}" class="button">Go to Record W52 High</a>
+        {% elif source == 'filtered_results' %}
+            <a href="{{ url_for('filtered_results') }}" class="button">Go to Filtered Results</a>
+        {% endif %}
+        {% if previous_seccode %}
+            <a href="{{ url_for('plot', seccode=previous_seccode, source=source) }}" class="button">Previous</a>
+        {% endif %}
+        {% if next_seccode %}
+            <a href="{{ url_for('plot', seccode=next_seccode, source=source) }}" class="button">Next</a>
+        {% endif %}
+        {% if not previous_seccode and not next_seccode %}
+            <a href="javascript:history.back()" class="button">Go Back</a>
+        {% endif %}
+    </div>
+    
+    <!-- Revisions info for filtered_results -->
+    {% if source == 'filtered_results' %}
+    <div class="additional-info">
+        <!-- <h3>Rivisions</h3> -->
+        <table>
+            <tr>
+                <th>Earn Flag</th>
+                <td>{{ earn_flag if earn_flag else '-' }}</td>
+            </tr>
+            <tr>
+                <th>Div Flag</th>
+                <td>{{ div_flag if div_flag else '-' }}</td>
+            </tr>
+        </table>
+    </div>
+    {% endif %}
+    
+    <div class="external-links">
+        <a href="https://kabutan.jp/stock/finance?code={{ seccode }}" target="_blank">Kabutan</a>
+        <a href="https://shikiho.toyokeizai.net/stocks/{{ seccode }}" target="_blank">四季報</a>
+        <a href="https://www.tradingview.com/chart/?symbol=TSE:{{ seccode }}" target="_blank">Chart</a>
+    </div>
+    
+    <div class="graph-container">
+        <div id="loading">Loading...</div>
+        <img id="graph-img" src="{{ url_for('plot_image', seccode=seccode) }}" alt="Graph for {{ companyname }}" style="display: none;">
+    </div>
+    
+    <div class="button-container">
+        {% if source == 'growth' %}
+            <button class="growth-button" onclick="removeFromGrowth('{{ seccode }}')">Remove from Growth</button>
+        {% else %}
+            <button class="growth-button" onclick="addToGrowth('{{ seccode }}')">Add to Growth</button>
+        {% endif %}
+
+        {% if source == 'value' %}
+        <button class="value-button" onclick="removeFromValue('{{ seccode }}')">Remove from Value</button>
+        {% else %}
+        <button class="value-button" onclick="addToValue('{{ seccode }}')">Add to Value</button>
+        {% endif %}
+
+        {% if source == 'recordhigh' %}
+            <button class="recordhigh-button" onclick="removeFromRecordhigh('{{ seccode }}')">Remove from Record High</button>
+        {% else %}
+            <button class="recordhigh-button" onclick="addToRecordhigh('{{ seccode }}')">Add to Record High</button>
+        {% endif %}
+        
+        {% if source == 'record_w52_high' %}
+            <button class="record-w52-button" onclick="removeFromRecordW52High('{{ seccode }}')">Remove from Record W52 High</button>
+        {% endif %}
+    </div>    
+
+    <script>
+        const img = document.getElementById('graph-img');
+        const loading = document.getElementById('loading');
+        
+        img.onload = function() {
+            loading.style.display = 'none';
+            img.style.display = 'block';
+        };
+        
+        img.onerror = function() {
+            loading.innerHTML = 'Failed to load graph.';
+        };
+        
+        function addToGrowth(seccode) {
+            $.post("{{ url_for('growth.add_to_growth') }}", { seccode }, function(response) {
+                alert(response.message);
+            });
+        }
+
+        function removeFromGrowth(seccode) {
+            $.post("{{ url_for('growth.remove_from_growth') }}", { seccode }, function(response) {
+                alert(response.message);
+            });
+        }
+        function addToValue(seccode) {
+            $.post("{{ url_for('value.add_to_value') }}", { seccode }, function(response) {
+                alert(response.message);
+            });
+        }
+        function removeFromValue(seccode) {
+            $.post("{{ url_for('value.remove_from_value') }}", { seccode }, function(response) {
+                alert(response.message);
+            });
+        }
+        function addToRecordhigh(seccode) {
+            $.post("{{ url_for('recordhigh.add_to_recordhigh') }}", { seccode }, function(response) {
+                alert(response.message);
+            });
+        }
+        function removeFromRecordhigh(seccode) {
+            $.post("{{ url_for('recordhigh.remove_from_recordhigh') }}", { seccode }, function(response) {
+                alert(response.message);
+            });
+        }
+        function removeFromRecordW52High(seccode) {
+            $.post("{{ url_for('record_w52_high.remove_from_record_w52_high') }}", { seccode }, function(response) {
+                alert(response.message);
+            });
+        }
+    </script>
+</body>
+</html>

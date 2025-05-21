@@ -1,0 +1,146 @@
+
+<!--t3-1-->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Record High</title>
+    <!-- Include DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/fixedheader/3.1.9/css/fixedHeader.dataTables.min.css">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            margin-top: 20px;
+            font-size: 2em;
+            color: #333;
+        }
+        .table-container {
+            width: 90%; /* Set table container width */
+            margin: 0 auto;
+            overflow: hidden;
+        }
+        table {
+            width: 100%; /* Ensure the table fills the container width */
+            border-collapse: collapse;
+            background-color: white;
+            border: 1px solid #ccc;
+        }
+        th, td {
+            padding: 8px;
+            text-align: center;
+            border: 1px solid black;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .go-to-index-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 1em;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Your Record High List</h1>
+<a href="{{ url_for('index') }}" class="go-to-index-button">Go to Index</a>
+<div class="table-container">
+    <table id="recordhigh_table" class="display">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Sec Code</th>
+                <th>Company Name</th>
+                <th>Fiscal Year End</th>
+                <th>Quarter</th>
+                <th>Growth %</th>
+                <th>Projected Growth %</th>
+                <th>Growth Opvalue %</th>
+                <th>Projected Opvalue Growth %</th>
+                <th>Quarter End Date</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in recordhigh %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td><a href="{{ url_for('plot', seccode=item['seccode'], source='recordhigh') }}">{{ item['seccode'] }}</a></td>
+                <td>{{ item['companyname'] }}</td>
+                <td>{{ item['fiscalyearend'] }}</td>
+                <td>{{ item['quarter'] }}</td>
+                <td>{{ "%.2f" | format(item['growth_percentage']) }}</td>
+                <td>{{ "%.2f" | format(item['projected_growth_rate']) }}</td>
+                <td>{{ "%.2f" | format(item['growth_percentage_opvalue']) }}</td>
+                <td>{{ "%.2f" | format(item['projected_growth_rate_opvalue']) }}</td>
+                <td>{{ item['quarterenddate'] }}</td>
+                <td>
+                    <button onclick="removeFromRecordhigh('{{ item['seccode'] }}')">Remove</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Include jQuery and DataTables JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/fixedheader/3.1.9/js/dataTables.fixedHeader.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#recordhigh_table').DataTable({
+            "scrollY": "700px",      // Enable vertical scrolling
+            "scrollCollapse": true,  // Allow table to shrink if fewer entries
+            "paging": false,         // Disable pagination
+            "fixedHeader": true,     // Fix the header
+            "autoWidth": false,      // Prevent automatic column width adjustment
+            "ordering": false,       // Disable ordering for simplicity
+            "dom": 'i<"top"f>rt<"bottom"lp><"clear">' // Move info display to the top
+        });
+    });
+    function removeFromRecordhigh(seccode) {
+        $.ajax({
+            type: "POST",
+            url: "{{ url_for('recordhigh.remove_from_recordhigh') }}",
+            data: { seccode: seccode },
+            success: function(response) {
+                alert(response.message);
+                location.reload();  // ページのリロードで削除後の状態を反映
+            },
+            error: function(xhr, status, error) {
+                console.error("Failed to remove from Record High List:", xhr.responseText);
+                alert('Error removing from Record High List.');
+            }
+        });
+    }
+
+</script>
+</body>
+</html>

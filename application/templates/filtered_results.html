@@ -1,0 +1,110 @@
+
+
+<!--t3-1-->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Filtered Results</title>
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/fixedheader/3.1.9/css/fixedHeader.dataTables.min.css">
+</head>
+<body>
+
+<h2>Filtered Results</h2>
+<a href="{{ url_for('index') }}" class="go-to-index-button">Go to Index</a>
+<table id="companies_table" class="display">
+    <thead>
+        <tr>
+            <th>Sec Code</th>
+            <th>Company Name</th>
+            <th>Fiscal Year End</th>
+            <th>Quarter</th>
+            <th>Sales Growth %</th>
+            <th>Projected Sales Growth %</th>
+            <th>Opvalue Growth %</th>
+            <th>Projected Opvalue Growth %</th>
+            <th>Quarter End Date</th>
+            <th>Filing Date</th>
+            <th>Earn Flag</th>
+            <th>Div Flag</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for company in companies %}
+        <tr>
+            <td><a href="{{ url_for('plot', seccode=company['seccode'], source='filtered_results') }}">{{ company['seccode'] }}</a></td>
+            <td>{{ company['companyname'] }}</td>
+            <td>{{ company['fiscalyearend'].strftime('%Y-%m-%d') if company['fiscalyearend'] else 'N/A' }}</td>
+            <td>{{ company['quarter'] }}</td>
+            <td>{{ company['growth_percentage'] }}</td>
+            <td>{{ company['projected_growth_rate'] }}</td>
+            <td>{{ company['growth_percentage_opvalue'] }}</td>
+            <td>{{ company['projected_growth_rate_opvalue'] }}</td>
+            <td>{{ company['quarterenddate'].strftime('%Y-%m-%d') }}</td>
+            <td>{{ company['filingdate'].strftime('%Y-%m-%d') if company['filingdate'] else 'N/A' }}</td>
+            <td>{{ company['earn_flag'] if company['earn_flag'] else '' }}</td>
+            <td>{{ company['div_flag'] if company['div_flag'] else '' }}</td>            
+            <td>
+                <button onclick="addToWatchlist('{{ company['seccode'] }}')">Add to Watchlist</button>
+                <button onclick="addToValue('{{ company['seccode'] }}')">Add to Value</button>
+                <button onclick="addToRecordhigh('{{ company['seccode'] }}')">Add to Record High</button>
+            </td>
+        </tr>
+    {% endfor %}
+    
+    </tbody>
+</table>
+
+<!-- jQuery and DataTables JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/fixedheader/3.1.9/js/dataTables.fixedHeader.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#companies_table').DataTable({
+            "scrollY": "700px",   // Adjust the scroll height if needed
+            "scrollCollapse": true,
+            "paging": false,       // Disable pagination if not needed
+            "fixedHeader": true,   // Fix the header
+            "autoWidth": false,    // Disable automatic column width calculation
+            "columnDefs": [
+                { "width": "300px", "targets": 2 } // Set width for the Company Name column if necessary
+            ],
+            "dom": 'i<"top"f>rt<"bottom"lp><"clear">' // Move the info (i) to the top
+        });
+    });
+
+    function addToGrowth(seccode) {
+        $.post("{{ url_for('growth.add_to_growth') }}", { seccode: seccode })
+            .done(function(response) {
+                alert(response.message);
+            })
+            .fail(function() {
+                alert('Error adding to Growth List.');
+            });
+    }
+    function addToValue(seccode) {
+        $.post("{{ url_for('value.add_to_value') }}", { seccode: seccode })
+            .done(function(response) {
+                alert(response.message);
+            })
+            .fail(function() {
+                alert('Error adding to value.');
+            });
+    }
+    function addToRecordhigh(seccode) {
+        $.post("{{ url_for('recordhigh.add_to_recordhigh') }}", { seccode: seccode })
+            .done(function(response) {
+                alert(response.message);
+            })
+            .fail(function() {
+                alert('Error adding to Record High.');
+            });
+    }
+</script>
+</body>
+</html>
