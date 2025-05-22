@@ -81,7 +81,8 @@ def plot_combined_chart(seccode, engine):
     ax1.set_xlabel('Disclosed Date', fontproperties=font_prop)
     ax1.set_ylabel('Value', fontproperties=font_prop)
     ax1.set_title(f'Fair Values for Company {seccode} - {companyname}', fontproperties=font_prop)
-    ax1.grid(True)
+    # ax1.grid(True)
+    ax1.grid(True, axis='y')  # ✅ show horizontal price lines only
     ax1.legend(loc='upper left', prop=font_prop)
 
     ax1.yaxis.set_label_position("right")
@@ -124,7 +125,7 @@ def plot_combined_chart(seccode, engine):
             raise ValueError(f"Missing columns in stock data for {seccode}: {missing_columns}. This may be a yfinance issue.")
 
         # Resample monthly data if columns are present
-        stock_data = stock_data.resample('ME').agg({
+        stock_data = stock_data.resample('W-FRI').agg({  #Use 'ME' for end of month, 'W-FRI' for end of week
             'Open': 'first',
             'High': 'max',
             'Low': 'min',
@@ -143,15 +144,99 @@ def plot_combined_chart(seccode, engine):
         img.seek(0)
         return img, companyname
 
-    mpf.plot(stock_data, type='candle', ax=ax1, style='charles', show_nontrading=True)
+    # mpf.plot(stock_data, type='candle', ax=ax1, style='charles', show_nontrading=True)
+    mpf.plot(
+        stock_data,
+        type='ohlc',
+        ax=ax1,
+        style='charles',
+        show_nontrading=True,
+        update_width_config=dict(
+            # candle_linewidth=0.5,
+            # candle_width=5.0
+            ohlc_linewidth=1.5,  # Make OHLC bars thicker
+            ohlc_ticksize=3.0    # Extend open/close "ticks" wider
+        )
+    )
 
     #combined_dates = pd.date_range(start=min(df['quarterenddate'].min(), stock_data.index.min()), end=max(df['quarterenddate'].max(), stock_data.index.max()), freq='YS')
     # Use the same start_date and end_date for the x-axis limits
     ax1.set_xlim(start_date, end_date_plus_margin)
 
-    combined_dates = pd.date_range(start=start_date, end=end_date_plus_margin, freq='YS')   
+    # combined_dates = pd.date_range(start=start_date, end=end_date_plus_margin, freq='YS')   
+    # combined_dates = pd.date_range(start=start_date, end=end_date_plus_margin, freq='6MS')  # Every 6 months
+    combined_dates = pd.date_range(start=start_date, end=end_date_plus_margin, freq='2QS-JAN')
+
+    for date in combined_dates:
+        if date.month == 1:
+            ax1.axvline(
+                x=date,
+                color='gray',
+                linewidth=1.2,
+                linestyle='-',   # solid line for January
+                zorder=0
+            )
+        else:
+            ax1.axvline(
+                x=date,
+                color='gray',
+                linewidth=0.8,
+                linestyle=(0, (4, 6)),  # dashed for July
+                zorder=0
+            )
+
+    # Set the ticks (6-month grid lines: Jan + Jul)
     ax1.set_xticks(combined_dates)
-    ax1.set_xticklabels(combined_dates.strftime('%Y'), rotation=0, fontproperties=font_prop)
+
+    # Generate only the January label positions and text
+    label_positions = [d for d in combined_dates if d.month == 1]
+    label_texts = [d.strftime('%Y') for d in label_positions]
+
+    # Set only the labeled ticks (once), with clean horizontal text
+    ax1.set_xticks(label_positions)
+    ax1.set_xticklabels(label_texts, fontproperties=font_prop, rotation=0)
+
+    # 1. Calculate ymax
+    ymax = max(
+        df['bps'].max(),
+        df['bps_eval'].max(),
+        (df['bps_eval'] + df['opvalue']).max(),
+        df['nextyrfcastfairvalue'].max(),
+        df['adjusted_divannual_for_chart'].max() / 0.04,
+        df['adjusted_fcastdivannual_for_chart'].max() / 0.04,
+        df['fairvalue'].max(),
+        stock_data['High'].max()
+    )
+
+    # 2. Set axis limits
+    ax1.set_ylim(bottom=0, top=ymax * 1.1)
+
+    # 3. Check if *any* series is clipped at the bottom
+    clipped_mask = (
+        (df['bps'] < 0) |
+        (df['bps_eval'] < 0) |
+        ((df['bps_eval'] + df['opvalue']) < 0) |
+        (df['nextyrfcastfairvalue'] < 0) |
+        (df['fairvalue'] < 0) |
+        ((df['adjusted_divannual_for_chart'] / 0.04) < 0) |
+        ((df['adjusted_fcastdivannual_for_chart'] / 0.04) < 0)
+    )
+
+    # 4. Annotate if any value was clipped below zero
+    if clipped_mask.any():
+        ax1.text(
+            df['quarterenddate'].iloc[-1],
+            ymax * 1.05,
+            "⚠️ CLIPPED!",
+            fontsize=12,
+            color='red',
+            ha='right',
+            va='bottom'
+        )
+
+
+
+
 
     plt.tight_layout()
 
@@ -161,7 +246,6 @@ def plot_combined_chart(seccode, engine):
     img.seek(0)
 
     return img, companyname
-
 
 # テスト実行用
 if __name__ == "__main__":
