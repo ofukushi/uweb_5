@@ -1,0 +1,26 @@
+
+# .github/workflows/mirror-to-gitlab.yml
+name: Mirror to GitLab
+
+on:
+  push:
+    branches:
+      - main  # Adjust if your main branch is different
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout GitHub Repo
+        uses: actions/checkout@v3
+
+      - name: Push to GitLab
+        env:
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+          git remote add gitlab https://oauth2:${GITLAB_TOKEN}@gitlab.com/ofukushi-group/uweb_5.git
+          git push --mirror gitlab
+
