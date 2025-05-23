@@ -13,6 +13,8 @@
 <body>
 
 <h2>Filtered Results</h2>
+<!-- Debug URL for Add to Dividend -->
+<p style="color: red;">Add to Dividend URL: {{ url_for('dividend.add_to_dividend') }}</p>
 <a href="{{ url_for('index') }}" class="go-to-index-button">Go to Index</a>
 <table id="companies_table" class="display">
     <thead>
@@ -51,6 +53,7 @@
                 <button onclick="addToWatchlist('{{ company['seccode'] }}')">Add to Watchlist</button>
                 <button onclick="addToValue('{{ company['seccode'] }}')">Add to Value</button>
                 <button onclick="addToRecordhigh('{{ company['seccode'] }}')">Add to Record High</button>
+                <button onclick="addToDividend('{{ company['seccode'] }}')">Add to Dividend</button>
             </td>
         </tr>
     {% endfor %}
@@ -103,6 +106,15 @@
             })
             .fail(function() {
                 alert('Error adding to Record High.');
+            });
+    }
+        function addToDividend(seccode) {
+        $.post("{{ url_for('dividend.add_to_dividend') }}", { seccode: seccode })
+            .done(function(response) {
+                alert(response.message);
+            })
+            .fail(function() {
+                alert('Error adding to Dividend.');
             });
     }
 </script>

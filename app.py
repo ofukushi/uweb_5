@@ -32,12 +32,14 @@ from application.routes.growth_route import growth_bp
 from application.routes.recordhigh_route import recordhigh_bp
 from application.routes.record_w52_high_route import record_w52_high_bp
 from application.routes.value_route import value_bp
+from application.routes.dividend_route import dividend_bp
 
 # Register the Blueprint
 app.register_blueprint(growth_bp, url_prefix='/growth')
 app.register_blueprint(recordhigh_bp, url_prefix='/recordhigh')
 app.register_blueprint(record_w52_high_bp, url_prefix='/record_w52_high')
 app.register_blueprint(value_bp, url_prefix='/value')
+app.register_blueprint(dividend_bp, url_prefix='/dividend')
 
 app.secret_key = os.urandom(24)
 
@@ -74,6 +76,8 @@ def plot(seccode):
         table_name = 'record_w52_high'
     elif source == 'value':
         table_name = 'value'
+    elif source == 'dividend':
+        table_name = 'dividend'
 
     companyname = None
     next_seccode = None

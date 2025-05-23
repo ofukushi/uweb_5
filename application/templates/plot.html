@@ -80,7 +80,8 @@
         .growth-button,
         .recordhigh-button,
         .value-button,
-        .record-w52-button {
+        .record-w52-button,
+        .dividend-button {
             padding: 10px 20px;
             border-radius: 5px;
             font-size: 1em;
@@ -121,6 +122,12 @@
         .record-w52-button:hover {
             background-color: #218838;
         }
+        .dividend-button {
+            background-color: #ffa500;
+        }
+        .dividend-button:hover {
+            background-color: #cc8400;
+        }
     </style>
     <style>
         .additional-info {
@@ -147,7 +154,6 @@
         <h1>Graph for {{ companyname }}</h1>
         <h2>Sec Code: {{ seccode }}</h2>
     </div>
-    
     <div class="navigation-buttons">
         {% if source == 'index' %}
             <a href="{{ url_for('index') }}" class="button">Go to Index</a>
@@ -159,9 +165,12 @@
             <a href="{{ url_for('recordhigh.view_recordhigh') }}" class="button">Go to Record High</a>
         {% elif source == 'record_w52_high' %}
             <a href="{{ url_for('record_w52_high.record_w52_high') }}" class="button">Go to Record W52 High</a>
+        {% elif source == 'dividend' %}
+            <a href="{{ url_for('dividend.view_dividend') }}" class="button">Go to Dividend</a>
         {% elif source == 'filtered_results' %}
             <a href="{{ url_for('filtered_results') }}" class="button">Go to Filtered Results</a>
         {% endif %}
+
         {% if previous_seccode %}
             <a href="{{ url_for('plot', seccode=previous_seccode, source=source) }}" class="button">Previous</a>
         {% endif %}
@@ -219,7 +228,13 @@
         {% else %}
             <button class="recordhigh-button" onclick="addToRecordhigh('{{ seccode }}')">Add to Record High</button>
         {% endif %}
-        
+
+        {% if source == 'dividend' %}
+            <button class="dividend-button" onclick="removeFromDividend('{{ seccode }}')">Remove from Dividend</button>
+        {% else %}
+            <button class="dividend-button" onclick="addToDividend('{{ seccode }}')">Add to Dividend</button>
+        {% endif %}
+
         {% if source == 'record_w52_high' %}
             <button class="record-w52-button" onclick="removeFromRecordW52High('{{ seccode }}')">Remove from Record W52 High</button>
         {% endif %}
@@ -272,6 +287,21 @@
         function removeFromRecordW52High(seccode) {
             $.post("{{ url_for('record_w52_high.remove_from_record_w52_high') }}", { seccode }, function(response) {
                 alert(response.message);
+            });
+        }
+        function addToDividend(seccode) {
+            $.post("{{ url_for('dividend.add_to_dividend') }}", { seccode }, function(response) {
+                alert(response.message);
+            }).fail(function() {
+                alert('Error adding to Dividend.');
+            });
+        }
+
+        function removeFromDividend(seccode) {
+            $.post("{{ url_for('dividend.remove_from_dividend') }}", { seccode }, function(response) {
+                alert(response.message);
+            }).fail(function() {
+                alert('Error removing from Dividend.');
             });
         }
     </script>

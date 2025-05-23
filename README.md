@@ -302,3 +302,45 @@ if clipped_mask.any():
     ymax * 1.1 で 上限に10%の余白を加えているため、
     基本的にすべてのプラス値は表示されます
     プラス側は「切られている可能性はほぼない」という前提で動いています
+
+uweb_5
+project/
+├── .env
+├── .gitignore
+├── app.py
+├── Procfile
+├── README.md
+├── requirements.txt
+└── application/
+       ├── backend/
+       |      ├── __init__.py
+       |      ├── auth.py
+       |      ├── db_connect.py
+       |      ├── engine.py
+       |      ├── fetch_company_data.py
+       |      ├── filtered_table.py     
+       |      └── stock_price.py  #fetch_company_data.pyで呼ばれている
+       ├── fonts/
+       ├── routes/
+       |      ├── __init__.py
+       |      ├── growth_route.py
+       |      ├── record_w52_high_route.py
+       |      ├── recordhigh_route.py
+       |      └── value_route.py
+       ├── static/
+       |      ├── css/
+       |      ├── js/
+       |      └── images/
+       ├── templates/
+       |       ├── filtered_results.html
+       |       ├── growth.html
+       |       ├── index.html
+       |       ├── login.html
+       |       ├── plot.html
+       |       ├── record_w52_high.html
+       |       ├── recordhigh.html
+       |       └── value.html
+       ├── __init__.py
+       ├── plot_fins_all_bps_opvalues.py
+       ├── plot_fins_all_netsales.py
+       └── 
