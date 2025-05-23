@@ -343,5 +343,80 @@ project/
        ├── __init__.py
        ├── plot_fins_all_bps_opvalues.py
        ├── plot_fins_all_netsales.py
-       └── # Trigger mirror
-# Trigger mirror
+       └── 
+
+✅ Step-by-Step: GitHub → GitLab Push Mirroring
+1. Go to Your GitHub Repo → Settings → Secrets and variables → Actions → "New repository secret"
+
+Create a new secret:
+    Name: GITLAB_TOKEN
+    Value: your GitLab personal access token
+2. Create a GitHub Action Workflow
+📂 Project folder structure example:
+your-project/
+├── .github/
+│   └── workflows/
+│       └── mirror-to-gitlab.yml   ✅ <-- THIS is the GitHub Actions workflow file
+├── app.py
+├── README.md
+├── ...
+
+🔁 .github/workflows/mirror-to-gitlab.yml
+Navigate to your project directory:
+cd /mnt/c/geekom_python_projects/git_projects/uweb_5
+Create the directory and file:
+mkdir -p .github/workflows
+nano .github/workflows/mirror-to-gitlab.yml
+Then paste your YAML workflow content and save it (in nano, press Ctrl+O, Enter, then Ctrl+X).
+Add and commit the file:
+git add .github/workflows/mirror-to-gitlab.yml
+git commit -m "Add GitHub Action to mirror repo to GitLab"
+Push the commit to GitHub:
+git push origin main
+
+Add a file like this:
+# .github/workflows/mirror-to-gitlab.yml
+name: Mirror to GitLab
+
+on:
+  push:
+    branches:
+      - main  # Adjust if your main branch is different
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout GitHub Repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetch the full history
+
+      - name: Push to GitLab
+        env:
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+          git remote add gitlab https://oauth2:${GITLAB_TOKEN}@gitlab.com/ofukushi-group/uweb_5.git
+
+          # Push all branches and tags, but avoid pushing hidden refs
+          git push gitlab --force --prune --all
+          git push gitlab --force --prune --tags
+
+✅ What to Do:
+    Update GITLAB_URL:
+    Replace USERNAME/REPO with your GitLab path.
+    Add Secret:
+    In your GitHub repo, go to Settings → Secrets and variables → Actions → New repository secret:
+        Name: GITLAB_TOKEN
+        Value: (your GitLab personal access token)
+    Commit the file to .github/workflows/mirror-to-gitlab.yml.
+
+🔄 To Trigger It Now:
+Make any small change to your repo, for example:
+echo "# Trigger mirror" >> README.md
+git add README.md
+git commit -m "Trigger GitHub to GitLab mirror"
+git push origin main

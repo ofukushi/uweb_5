@@ -211,32 +211,34 @@ def plot_combined_chart(seccode, engine):
     # 2. Set axis limits
     ax1.set_ylim(bottom=0, top=ymax * 1.1)
 
-    # 3. Check if *any* series is clipped at the bottom
-    clipped_mask = (
-        (df['bps'] < 0) |
-        (df['bps_eval'] < 0) |
-        ((df['bps_eval'] + df['opvalue']) < 0) |
-        (df['nextyrfcastfairvalue'] < 0) |
-        (df['fairvalue'] < 0) |
-        ((df['adjusted_divannual_for_chart'] / 0.04) < 0) |
-        ((df['adjusted_fcastdivannual_for_chart'] / 0.04) < 0)
-    )
+    # 3. Identify clipped series and collect names
+    clipped_series = []
+    if (df['bps'] < 0).any():
+        clipped_series.append("bps")
+    if (df['bps_eval'] < 0).any():
+        clipped_series.append("bps_eval")
+    if ((df['bps_eval'] + df['opvalue']) < 0).any():
+        clipped_series.append("bps_eval + opvalue")
+    if (df['nextyrfcastfairvalue'] < 0).any():
+        clipped_series.append("nextyrfcastfairvalue")
+    if (df['fairvalue'] < 0).any():
+        clipped_series.append("fairvalue")
+    if ((df['adjusted_divannual_for_chart'] / 0.04) < 0).any():
+        clipped_series.append("dividend_yield")
+    if ((df['adjusted_fcastdivannual_for_chart'] / 0.04) < 0).any():
+        clipped_series.append("forecast_dividend_yield")
 
     # 4. Annotate if any value was clipped below zero
-    if clipped_mask.any():
+    if clipped_series:
         ax1.text(
             df['quarterenddate'].iloc[-1],
             ymax * 1.05,
-            "⚠️ CLIPPED!",
+            f"⚠️ CLIPPED: {', '.join(clipped_series)}",
             fontsize=12,
             color='red',
             ha='right',
             va='bottom'
         )
-
-
-
-
 
     plt.tight_layout()
 
